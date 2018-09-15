@@ -31,7 +31,7 @@ public class NoteController {
 		this.noteService = noteService;
 	}
 	
-	@RequestMapping("/note")
+	@RequestMapping("/notes")
 	public ResponseEntity<HashMap<String, Object>> getAllNotes(@RequestParam(value = "notebookId" ,required=true) String notebookId){
 		ArrayList<Note>  notes = noteService.getAllNotes(notebookId);
 		ResponseEntity<HashMap<String, Object>> entity = null;
@@ -49,7 +49,7 @@ public class NoteController {
 		return entity;
 	}
 	
-	@RequestMapping(method=RequestMethod.POST,value="/note/addNote")
+	@RequestMapping(method=RequestMethod.POST,value="/notes/addNote")
 	public ResponseEntity<HashMap<String, Object>> addNote(@RequestBody AddnoteReqBody requestBody){
 
 		ResponseEntity<HashMap<String, Object>> entity = null;
@@ -70,7 +70,7 @@ public class NoteController {
 
 	}
 	
-	@RequestMapping(method=RequestMethod.DELETE,value="/note/deleteNote")
+	@RequestMapping(method=RequestMethod.DELETE,value="/notes/deleteNote")
 	public ResponseEntity<HashMap<String, Object>> deleteNote(@RequestBody Map<String,Object> requestBody){
 		Integer noteNumber = (Integer) requestBody.get("noteNumber");
 		String notebookId = (String) requestBody.get("notebookId");
@@ -80,7 +80,7 @@ public class NoteController {
 		map.putAll(requestBody);
 		
 
-		if(noteNumber != null && notebookId != null){
+		if(noteNumber != null  && notebookId.length() >= 1){
 
 			Note deletedNote = noteService.deleteNote(noteNumber,notebookId);
 					
@@ -100,19 +100,23 @@ public class NoteController {
 		return entity;
 
 	}
+
 	
-	@RequestMapping(value="/note/getNote")
+	@RequestMapping(value="/notes/getANote")
 	public ResponseEntity<HashMap<String, Object>> getANote(@RequestParam(value = "notebookId",required = true) 
-	String notebookId,@RequestParam(value = "noteNumber",required = true) int noteNumber){
+	String notebookId,@RequestParam(value = "noteNumber",required = true) Integer noteNumber){
 		
 		ResponseEntity<HashMap<String, Object>> entity = null;
 		HashMap<String,Object> map = new HashMap<String,Object>();
-		map.put("noteNumber", noteNumber);
-		
-		if(Integer.valueOf(noteNumber)!=null && notebookId != null){
+
+		if(noteNumber!= null && notebookId != null){
+			map.put("noteNumber", noteNumber);
+			map.put("notebookId", notebookId);
+
 			Note n = noteService.getANote(noteNumber,notebookId);
-			map.put("note", n);
+			
 			if(n != null){
+				map.put("note", n);
 				map.put("message", "Success");
 				entity = new ResponseEntity<HashMap<String, Object>>(map,HttpStatus.OK);
 
@@ -130,16 +134,17 @@ public class NoteController {
 
 	}
 	
-	@RequestMapping(value="/note/getNoteByTag")
+	@RequestMapping(value="/notes/getNoteByTag")
 	public ResponseEntity<HashMap<String,Object>> getANoteByTag(@RequestParam (value = "notebookId" ,required = true) 
 	String notebookId,@RequestParam (value = "tag",required = true) String tag){
 		
 		ResponseEntity<HashMap<String,Object>> entity = null;
 		HashMap <String,Object> map = new HashMap<String,Object>();
-		map.put("notebookId", notebookId);
-		map.put("tag", tag);
 		
-		if(tag != null && notebookId != null){
+		
+		if(tag.length() > 0 && notebookId.length() > 0){
+			map.put("notebookId", notebookId);
+			map.put("tag", tag);
 			List<Note> notesList = noteService.getANoteByTag(tag,notebookId);
 			map.put("notes", notesList);
 			if(notesList != null){
@@ -158,15 +163,15 @@ public class NoteController {
 		return entity;
 	}
 	
-	@RequestMapping(method=RequestMethod.PUT,value="/note/updateNote")
+	@RequestMapping(method=RequestMethod.PUT,value="/notes/updateNote")
 	public ResponseEntity<HashMap<String,Object>> updateNote(@RequestBody UpdateNoteReqBody requestBody){
 		
 		ResponseEntity<HashMap<String,Object>> entity = null;
 		HashMap<String,Object> map = new HashMap<String,Object>();
-		map.put("note", requestBody.getNote());
-		map.put("notebookId", requestBody.getNotebookId());
 		
 		if(noteService.updateNote(requestBody.getNote(), requestBody.getNotebookId(),requestBody.getNoteNumber())){
+			map.put("note", requestBody.getNote());
+			map.put("notebookId", requestBody.getNotebookId());
 			map.put("message", "Successfully updated note");
 			entity = new ResponseEntity<HashMap<String,Object>>(map,HttpStatus.OK);	
 		}
