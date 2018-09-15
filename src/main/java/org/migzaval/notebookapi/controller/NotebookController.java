@@ -73,7 +73,7 @@ public class NotebookController {
 		
 		map.put("notebookId", notebookId);
 
-		if(notebookId != null){
+		if(notebookId.length() >= 1){
 			if(notebookService.deleteNotebook(notebookId)){
 				map.put("message", "Deleted successfully");
 				entity = new ResponseEntity<HashMap<String, String>>(map,HttpStatus.ACCEPTED);
